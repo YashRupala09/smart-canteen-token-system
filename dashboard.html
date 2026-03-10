@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Canteen</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-surface);
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-content h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .stat-content p {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            height: 250px;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--border);
+            border-left: 2px solid var(--border);
+            margin-top: 20px;
+        }
+
+        .bar-col {
+            flex: 1;
+            background: var(--primary);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: height 0.5s ease;
+            min-height: 5px;
+        }
+
+        .bar-col:hover {
+            background: var(--primary-hover);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-val {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span style="font-size: 1.5rem;">📊</span> Canteen Admin
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item active">Dashboard</a>
+                <a href="token-counter.html" class="nav-item">POS / Tokens</a>
+                <a href="kitchen.html" class="nav-item">Kitchen</a>
+                <a href="display-board.html" class="nav-item">Display Board</a>
+                <a href="menu-management.html" class="nav-item">Menu Management</a>
+                <a href="reports.html" class="nav-item">Reports</a>
+                <br>
+                <hr style="border:0; border-top:1px solid var(--border);"><br>
+                <a href="#" class="nav-item" id="themeToggle">🌙 Dark Mode</a>
+                <a href="index.html" class="nav-item text-danger">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-icon menu-toggle" id="mobileMenuBtn" style="display: none;">☰</button>
+                    <h1 class="page-title">Today's Overview</h1>
+                </div>
+                <div class="topbar-actions">
+                    <span id="overviewDate" class="text-muted" style="font-weight: 500;"></span>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon text-primary">💰</div>
+                        <div class="stat-content">
+                            <h3>Total Revenue</h3>
+                            <p id="statRevenue">$0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon text-success">🍔</div>
+                        <div class="stat-content">
+                            <h3>Tokens Issued</h3>
+                            <p id="statTokens">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon text-warning">⏳</div>
+                        <div class="stat-content">
+                            <h3>Pending Orders</h3>
+                            <p id="statPending">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon text-danger">🛑</div>
+                        <div class="stat-content">
+                            <h3>Cancelled</h3>
+                            <p id="statCancelled">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <!-- Revenue over hours (Simulated) -->
+                    <div class="card">
+                        <h3>Popular Items (By Quantity Sold)</h3>
+                        <div class="bar-chart" id="popularChart">
+                            <p class="text-muted"
+                                style="align-self: flex-start; margin-top: 100px; width: 100%; text-align: center;">Not
+                                enough data.</p>
+                        </div>
+                    </div>
+
+                    <!-- Side list -->
+                    <div class="card">
+                        <h3>Recent Activity Logs</h3>
+                        <div id="activityLogs"
+                            style="margin-top: 15px; font-size: 0.9rem; overflow-y: auto; max-height: 300px;">
+                            <p class="text-muted">Loading...</p>
+                        </div>
+                        <br>
+                        <a href="reports.html" class="btn btn-outline"
+                            style="width: 100%; text-align: center; display: block;">View Detailed Reports</a>
+                    </div>
+                </div>
+
+                <div class="dashboard-actions" style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="saveTodayProfit()" style="padding: 12px 20px;">
+                        <span style="font-size: 1.25rem;">💰</span> Save Today Profit
+                    </button>
+                    <button class="btn btn-danger" onclick="resetTheDay()" style="padding: 12px 20px;">
+                        <span style="font-size: 1.25rem;">🔄</span> Reset the Day
+                    </button>
+                    <button class="btn btn-warning" onclick="seedDummyData()" style="padding: 12px 20px;">
+                        <span style="font-size: 1.25rem;">🧪</span> Generate 50 Dummy Records
+                    </button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/seed.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

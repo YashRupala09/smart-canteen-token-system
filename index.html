@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen Authentication</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        .login-container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #312E81 100%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .login-title {
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        .login-form .form-group {
+            text-align: left;
+        }
+        .pin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .pin-btn {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            padding: 15px;
+            font-size: 1.25rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .pin-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .pin-display {
+            font-size: 1.5rem;
+            letter-spacing: 5px;
+            text-align: center;
+            min-height: 48px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+            margin-bottom: 15px;
+            background: var(--bg-base);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="card login-card glass animate-fade-in">
+            <div class="login-logo">🍔</div>
+            <h2 class="login-title">Smart Canteen</h2>
+            <p class="text-muted">Enter Staff PIN to Continue</p>
+            
+            <div class="login-form">
+                <input type="password" id="pinInput" class="pin-display" readonly placeholder="****">
+                
+                <div class="pin-grid">
+                    <button class="pin-btn" onclick="enterPin('1')">1</button>
+                    <button class="pin-btn" onclick="enterPin('2')">2</button>
+                    <button class="pin-btn" onclick="enterPin('3')">3</button>
+                    <button class="pin-btn" onclick="enterPin('4')">4</button>
+                    <button class="pin-btn" onclick="enterPin('5')">5</button>
+                    <button class="pin-btn" onclick="enterPin('6')">6</button>
+                    <button class="pin-btn" onclick="enterPin('7')">7</button>
+                    <button class="pin-btn" onclick="enterPin('8')">8</button>
+                    <button class="pin-btn" onclick="enterPin('9')">9</button>
+                    <button class="pin-btn btn-danger" onclick="clearPin()">C</button>
+                    <button class="pin-btn" onclick="enterPin('0')">0</button>
+                    <button class="pin-btn btn-primary" onclick="login()">GO</button>
+                </div>
+            </div>
+            <p id="loginError" class="text-danger" style="margin-top: 15px; display: none;">Invalid PIN</p>
+            
+            <div style="margin-top: 20px;">
+                <p style="font-size: 0.8rem;" class="text-muted">Default Admin PIN: 1234<br>Default Staff PIN: 0000<br>Default Kitchen PIN: 1111</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Inline auth logic for simplicity
+        let pin = '';
+        const input = document.getElementById('pinInput');
+        
+        function enterPin(digit) {
+            if (pin.length < 4) {
+                pin += digit;
+                input.value = '*'.repeat(pin.length);
+            }
+        }
+        
+        function clearPin() {
+            pin = '';
+            input.value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+        
+        async function login() {
+            document.getElementById('loginError').style.display = 'none';
+            // Default roles map since we skip complex auth setup for now
+            const roles = {
+                '1234': { role: 'admin', url: 'dashboard.html' },
+                '0000': { role: 'staff', url: 'token-counter.html' },
+                '1111': { role: 'kitchen', url: 'kitchen.html' },
+                '2222': { role: 'display', url: 'display-board.html' }
+            };
+
+            if (roles[pin]) {
+                localStorage.setItem('canteen_role', roles[pin].role);
+                localStorage.setItem('canteen_user', 'User_' + roles[pin].role);
+                
+                // Ensure db is ready, then log
+                if (window.dbService && window.dbService.db) {
+                    await window.dbService.logActivity('Login', 'User_' + roles[pin].role);
+                }
+                
+                window.location.href = roles[pin].url;
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+                pin = '';
+                input.value = '';
+            }
+        }
+
+        // Setup default auth users if not present
+        document.addEventListener('appReady', async () => {
+            const users = await window.dbService.getAll('users');
+            if(users.length === 0) {
+                await window.dbService.put('users', { username: 'admin', pin: '1234', role: 'admin' });
+                await window.dbService.put('users', { username: 'staff', pin: '0000', role: 'staff' });
+                await window.dbService.put('users', { username: 'kitchen', pin: '1111', role: 'kitchen' });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Management - Smart Canteen</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span style="font-size: 1.5rem;">🍔</span> Canteen Admin
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">Dashboard</a>
+                <a href="token-counter.html" class="nav-item">POS / Tokens</a>
+                <a href="kitchen.html" class="nav-item">Kitchen</a>
+                <a href="display-board.html" class="nav-item">Display Board</a>
+                <a href="menu-management.html" class="nav-item active">Menu Management</a>
+                <a href="reports.html" class="nav-item">Reports</a>
+                <br>
+                <hr style="border:0; border-top:1px solid var(--border);"><br>
+                <a href="#" class="nav-item" id="themeToggle">🌙 Dark Mode</a>
+                <a href="index.html" class="nav-item text-danger">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-icon menu-toggle" id="mobileMenuBtn" style="display: none;">☰</button>
+                    <h1 class="page-title">Menu Management</h1>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" onclick="openMenuModal()">+ Add New Item</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Filters -->
+                <div class="card filter-bar"
+                    style="margin-bottom: 20px; display: flex; gap: 15px; align-items: center;">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search menu..."
+                        style="max-width: 300px;">
+                    <select id="categoryFilter" class="form-control" style="max-width: 200px;">
+                        <option value="">All Categories</option>
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Snacks">Snacks</option>
+                        <option value="Beverages">Beverages</option>
+                    </select>
+                </div>
+
+                <!-- Menu Table -->
+                <div class="card">
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border);">
+                                    <th style="padding: 12px;width: 60px;">Image</th>
+                                    <th style="padding: 12px;">Name</th>
+                                    <th style="padding: 12px;">Category</th>
+                                    <th style="padding: 12px;">Price</th>
+                                    <th style="padding: 12px;">Status</th>
+                                    <th style="padding: 12px; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="menuTableBody">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                        <div id="emptyState"
+                            style="text-align: center; padding: 40px; display: none; color: var(--text-muted)">
+                            <p>No menu items found. Add some delicious food!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div id="menuModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="card glass animate-fade-in"
+            style="width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+            <h2 id="modalTitle">Add Menu Item</h2>
+            <form id="menuForm">
+                <input type="hidden" id="itemId">
+                <div class="form-group">
+                    <label class="form-label">Item Name</label>
+                    <input type="text" id="itemName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select id="itemCategory" class="form-control" required>
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Snacks">Snacks</option>
+                        <option value="Beverages">Beverages</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label class="form-label">Price ($)</label>
+                        <input type="number" step="0.01" id="itemPrice" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 120px;">
+                        <label class="form-label">Prep Time (mins)</label>
+                        <input type="number" id="itemPrepTime" class="form-control" value="5" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Item Image (Optional)</label>
+                    <input type="file" id="itemImage" accept="image/*" class="form-control">
+                    <div id="imagePreview" style="margin-top: 10px; max-width: 100px;"></div>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="itemAvailable" checked style="width: 20px; height: 20px;">
+                    <label for="itemAvailable" style="margin: 0;" class="form-label">Available / In Stock</label>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="itemPopular" style="width: 20px; height: 20px;">
+                    <label for="itemPopular" style="margin: 0;" class="form-label">Mark as Popular (Quick Order)</label>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-outline" onclick="closeMenuModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/menu.js"></script>
+</body>
+
+</html>

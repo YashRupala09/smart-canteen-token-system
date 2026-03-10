@@ -1,0 +1,23 @@
+{
+  "name": "Smart Canteen Tokenization System",
+  "short_name": "SmartCanteen",
+  "description": "Digital token and order management system for canteens",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F3F4F6",
+  "theme_color": "#4F46E5",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "food", "productivity"]
+}

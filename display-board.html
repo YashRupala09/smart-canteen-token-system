@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Board - Smart Canteen</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        /* Ensure full screen for display board */
+        .board-container {
+            display: flex;
+            height: calc(100vh - 56px); /* leave room for footer */
+            width: 100vw;
+        }
+
+        .board-half {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 24px;
+            overflow-y: auto;
+            min-width: 0;
+        }
+
+        .board-preparing {
+            background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+            border-right: 2px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .board-ready {
+            background: linear-gradient(160deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        }
+
+        .board-title {
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            text-align: center;
+            font-weight: 900;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px currentColor;
+            padding: 12px 0;
+            border-bottom: 2px solid currentColor;
+        }
+
+        .title-preparing {
+            color: #FBBF24;
+        }
+
+        .title-ready {
+            color: #34D399;
+        }
+
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 16px;
+            align-content: start;
+        }
+
+        .token-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px 10px;
+            text-align: center;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: scale(0.9);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            color: white;
+        }
+
+        .token-item.preparing {
+            border-color: #FBBF24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            color: #FBBF24;
+        }
+
+        .token-item.ready {
+            border-color: #34D399;
+            background: linear-gradient(135deg, #065f46, #059669);
+            color: white;
+            box-shadow: 0 0 25px rgba(52, 211, 153, 0.5);
+            animation: pulseReady 2s infinite, popIn 0.5s forwards;
+        }
+
+        .board-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 12px 24px;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 1rem;
+            color: rgba(255,255,255,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+        
+        .clock-display {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.9);
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulseReady {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Visible navigation for exiting display board mode */
+        .exit-btn {
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.85);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .exit-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+        }
+    </style>
+</head>
+
+<body data-theme="dark"> <!-- Display board looks better in dark mode natively -->
+
+    <div class="board-container">
+
+        <!-- left side: Preparing -->
+        <div class="board-half board-preparing">
+            <h2 class="board-title title-preparing">Preparing</h2>
+            <div class="token-grid" id="preparingGrid">
+                <!-- Tokens rendered via js -->
+            </div>
+        </div>
+
+        <!-- right side: Ready -->
+        <div class="board-half board-ready">
+            <h2 class="board-title title-ready">Please Collect</h2>
+            <div class="token-grid" id="readyGrid">
+                <!-- Tokens rendered via js -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hidden audio element for chime -->
+    <audio id="chimeSound"
+        src="data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+        preload="auto"></audio>
+
+    <div class="board-footer">
+        <button class="exit-btn" onclick="window.location.href='dashboard.html'">← Back</button>
+        <span>🍔 Smart Canteen Display System</span>
+        <span class="clock-display" id="clock">12:00:00 PM</span>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/display.js"></script>
+</body>
+
+</html>

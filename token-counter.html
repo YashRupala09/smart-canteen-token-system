@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Counter - Smart Canteen</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            height: calc(100vh - 120px);
+        }
+
+        .menu-items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            align-content: start;
+        }
+
+        .menu-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .menu-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .menu-card:active {
+            transform: translateY(0);
+        }
+
+        .menu-card img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .order-panel {
+            background: var(--bg-surface);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+        }
+
+        .order-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .order-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .order-footer {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-base);
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .cart-qty-btn {
+            background: var(--bg-base);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            scrollbar-width: thin;
+        }
+
+        .category-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .category-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <span style="font-size: 1.5rem;">🍔</span> Counter Staff
+            </div>
+            <nav class="sidebar-nav">
+                <a href="token-counter.html" class="nav-item active">POS / Tokens</a>
+                <a href="display-board.html" class="nav-item">Display Board</a>
+                <br>
+                <hr style="border:0; border-top:1px solid var(--border);"><br>
+                <a href="#" class="nav-item" id="themeToggle">🌙 Dark Mode</a>
+                <a href="index.html" class="nav-item text-danger">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-icon menu-toggle" id="mobileMenuBtn">☰</button>
+                    <h1 class="page-title">Issue Tokens</h1>
+                </div>
+                <div class="topbar-actions">
+                    <span id="currentTime" class="text-muted"></span>
+                </div>
+            </header>
+
+            <div class="content-area" style="padding: 15px;">
+                <div class="pos-grid">
+
+                    <!-- Left: Menu Selection -->
+                    <div style="display: flex; flex-direction: column;">
+                        <input type="text" id="menuSearch" class="form-control" placeholder="Search menu..."
+                            style="margin-bottom: 15px;">
+
+                        <div class="category-tabs" id="categoryTabs">
+                            <div class="category-tab active" data-cat="All">All</div>
+                            <div class="category-tab" data-cat="Popular">⭐ Popular</div>
+                            <div class="category-tab" data-cat="Breakfast">Breakfast</div>
+                            <div class="category-tab" data-cat="Lunch">Lunch</div>
+                            <div class="category-tab" data-cat="Snacks">Snacks</div>
+                            <div class="category-tab" data-cat="Beverages">Beverages</div>
+                        </div>
+
+                        <div class="menu-items-grid" id="menuGrid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Current Order -->
+                    <div class="order-panel">
+                        <div class="order-header">
+                            <h3 style="margin: 0; display: flex; justify-content: space-between;">
+                                Current Order
+                                <span class="badge badge-pending">Next Token: <span
+                                        id="nextTokenPlaceholder">...</span></span>
+                            </h3>
+                        </div>
+
+                        <div class="order-items" id="orderCart">
+                            <div class="text-muted" style="text-align: center; margin-top: 50px;">
+                                Cart is empty. Select items to add.
+                            </div>
+                        </div>
+
+                        <div class="order-footer">
+                            <div
+                                style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 1.25rem;">
+                                <span>Total:</span>
+                                <span id="orderTotal">$0.00</span>
+                            </div>
+
+                            <textarea id="orderNotes" class="form-control" placeholder="Order notes (optional)..."
+                                style="height: 60px; margin-bottom: 15px; resize: none;"></textarea>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-outline" style="flex: 1;" onclick="clearCart()">Clear</button>
+                                <button class="btn btn-primary" style="flex: 2; font-size: 1.1rem;"
+                                    onclick="processOrder()" id="payBtn" disabled>Generate Token</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;">
+        <div class="card glass animate-fade-in" style="width: 350px; text-align: center;" id="receiptContent">
+            <h2>Token <span id="receiptToken" class="text-primary" style="font-size: 2.5rem; display: block;"></span>
+            </h2>
+            <div id="receiptItems"
+                style="text-align: left; margin: 20px 0; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); padding: 15px 0;">
+            </div>
+            <h3 style="text-align: left; display: flex; justify-content: space-between;">Total: <span
+                    id="receiptTotal"></span></h3>
+            <div style="margin-top: 25px;">
+                <button class="btn btn-primary" style="width: 100%;" onclick="closeReceipt()">Done / Next Order</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/orders.js"></script>
+</body>
+
+</html>

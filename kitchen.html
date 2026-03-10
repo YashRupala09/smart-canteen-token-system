@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Display - Smart Canteen</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .kitchen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .order-card {
+            background: var(--bg-surface);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .order-card.status-pending {
+            border-color: var(--warning);
+        }
+
+        .order-card.status-preparing {
+            border-color: var(--primary);
+        }
+
+        .order-card.status-delayed {
+            border-color: var(--danger);
+            animation: pulseRed 2s infinite;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .token-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .order-timer {
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .order-items {
+            flex: 1;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .order-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        @keyframes pulseRed {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span style="font-size: 1.5rem;">👨‍🍳</span> Kitchen
+            </div>
+            <nav class="sidebar-nav">
+                <a href="kitchen.html" class="nav-item active">Order Queue</a>
+                <br>
+                <hr style="border:0; border-top:1px solid var(--border);"><br>
+                <a href="#" class="nav-item" id="themeToggle">🌙 Dark Mode</a>
+                <a href="index.html" class="nav-item text-danger">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-icon menu-toggle" id="mobileMenuBtn" style="display: none;">☰</button>
+                    <h1 class="page-title">Kitchen Prep Queue</h1>
+                </div>
+                <div class="topbar-actions">
+                    <span class="badge badge-pending">Pending: <span id="pendingCount">0</span></span>
+                    <span class="badge badge-preparing">Preparing: <span id="preparingCount">0</span></span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Filters -->
+                <div class="filter-bar" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                    <button class="btn btn-outline active" id="filterAll">All Unfinished</button>
+                    <button class="btn btn-outline" id="filterPending">Pending Only</button>
+                    <button class="btn btn-outline" id="filterPreparing">Preparing Only</button>
+                </div>
+
+                <div class="kitchen-grid" id="kitchenGrid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/kitchen.js"></script>
+</body>
+
+</html>
