@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smart-canteen-v1';
+const CACHE_NAME = 'smart-canteen-v5';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -11,14 +11,18 @@ const ASSETS_TO_CACHE = [
     './css/style.css',
     './js/db.js',
     './js/app.js',
-    './js/auth.js',
     './js/menu.js',
     './js/orders.js',
     './js/kitchen.js',
     './js/display.js',
     './js/dashboard.js',
     './js/reports.js',
-    './manifest.json'
+    './js/seed.js',
+    './manifest.json',
+    './images/coffee.jpg',
+    './images/strawberry.jpg',
+    './images/tomato.jpg',
+    './images/ingredients.jpg'
 ];
 
 self.addEventListener('install', (event) => {

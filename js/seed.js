@@ -19,8 +19,9 @@ async function seedDummyData() {
             const prepTime = Math.floor(Math.random() * 15) + 3;
             const popular = Math.random() > 0.8;
             
-            // Generate a random food image from picsum (reliable free placeholder)
-            const image = `https://picsum.photos/seed/${encodeURIComponent(food.toLowerCase() + i)}/400/300`;
+            // Use local dummy images to ensure offline/APK functionality
+            const dummyImages = ['./images/coffee.jpg', './images/strawberry.jpg', './images/tomato.jpg', './images/ingredients.jpg'];
+            const image = dummyImages[Math.floor(Math.random() * dummyImages.length)];
 
             const id = 'item_dummy_' + Date.now() + '_' + i;
             addedMenuIds.push({ id, name, price, category, prepTime });
